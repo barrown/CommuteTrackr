@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CommuteTrackr</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .date-display {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .outward-section {
+            background-color: #87CEEB;
+        }
+
+        .return-section {
+            background-color: #1e3a8a;
+            border-top: 4px solid #000;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .outward-section .section-title {
+            color: #1e3a8a;
+            text-shadow: none;
+        }
+
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .btn {
+            padding: 18px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .outward-section .btn {
+            background-color: #ffffff;
+            color: #1e3a8a;
+            border: 2px solid #1e3a8a;
+        }
+
+        .outward-section .btn:hover:not(:disabled) {
+            background-color: #1e3a8a;
+            color: #ffffff;
+        }
+
+        .return-section .btn {
+            background-color: #ffffff;
+            color: #1e3a8a;
+            border: 2px solid #ffffff;
+        }
+
+        .return-section .btn:hover:not(:disabled) {
+            background-color: transparent;
+            color: #ffffff;
+        }
+
+        .btn:disabled {
+            opacity: 0.9;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+        }
+
+        .btn.logged {
+            background-color: #22c55e !important;
+            color: #2c3e50 !important;
+            border-color: #22c55e !important;
+        }
+
+        .btn.logged::after {
+            content: '✓';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .timestamp {
+            font-size: 0.85rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 3px;
+            opacity: 0.9;
+        }
+
+        .loading {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .loading::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background-color: #fee2e2;
+            color: #dc2626;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            border: 1px solid #fecaca;
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 12px;
+            }
+            
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 15px 18px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+            }
+            
+            .section {
+                width: 50%;
+            }
+            
+            .return-section {
+                border-top: none;
+                border-left: 4px solid #000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>CommuteTrackr</h1>
+        <div class="date-display" id="currentDate"></div>
+    </div>
+
+    <div class="container">
+        <div class="section outward-section">
+            <h2 class="section-title">Outward Journey</h2>
+            <div class="buttons-container">
+                <button class="btn" data-activity="boarded_train_out" data-label="Boarded Train">
+                    Boarded Train
+                </button>
+                
+                <button class="btn" data-activity="alighted_train_out" data-label="Alighted Train">
+                    Alighted Train
+                </button>
+                
+                <button class="btn" data-activity="boarded_tube_out" data-label="Boarded Tube">
+                    Boarded Tube
+                </button>
+                
+                <button class="btn" data-activity="alighted_tube_out" data-label="Alighted Tube">
+                    Alighted Tube
+                </button>
+                
+                <button class="btn" data-activity="arrived_at_scale_space" data-label="Arrived at Scale Space">
+                    Arrived at Scale Space
+                </button>
+            </div>
+        </div>
+
+        <div class="section return-section">
+            <h2 class="section-title">Return Journey</h2>
+            <div class="buttons-container">
+                <button class="btn" data-activity="left_scale_space" data-label="Left Scale Space">
+                    Left Scale Space
+                </button>
+                
+                <button class="btn" data-activity="boarded_tube_return" data-label="Boarded Tube">
+                    Boarded Tube
+                </button>
+                
+                <button class="btn" data-activity="alighted_tube_return" data-label="Alighted Tube">
+                    Alighted Tube
+                </button>
+                
+                <button class="btn" data-activity="boarded_train_return" data-label="Boarded Train">
+                    Boarded Train
+                </button>
+                
+                <button class="btn" data-activity="alighted_train_return" data-label="Alighted Train">
+                    Alighted Train
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Display current date
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('currentDate').textContent = 
+                now.toLocaleDateString('en-GB', options);
+        }
+
+        // Initialize date display
+        updateDate();
+
+        // Show error message
+        function showError(message) {
+            // Remove existing error messages
+            const existingErrors = document.querySelectorAll('.error-message');
+            existingErrors.forEach(error => error.remove());
+
+            // Create new error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            
+            // Insert after header
+            const header = document.querySelector('.header');
+            header.insertAdjacentElement('afterend', errorDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        // Refresh button states from server
+        async function refreshButtonStates() {
+            try {
+                const response = await fetch('/commutetrackr/api/today');
+                const data = await response.json();
+                
+                // Update each button based on server data
+                document.querySelectorAll('.btn').forEach(button => {
+                    const activity = button.getAttribute('data-activity');
+                    const label = button.getAttribute('data-label');
+                    const timestamp = data[activity];
+                    
+                    if (timestamp) {
+                        // Mark as logged with timestamp
+                        button.innerHTML = label + `<span class="timestamp">${timestamp}</span>`;
+                        button.classList.add('logged');
+                        button.disabled = true;
+                    } else {
+                        // Reset to unlogged state
+                        button.innerHTML = label;
+                        button.classList.remove('logged');
+                        button.disabled = false;
+                    }
+                });
+            } catch (error) {
+                console.error('Error refreshing button states:', error);
+                showError('Failed to refresh button states');
+            }
+        }
+
+        // Log activity function
+        async function logActivity(button, activity) {
+            // Add loading state
+            button.classList.add('loading');
+            button.disabled = true;
+            
+            const label = button.getAttribute('data-label');
+            button.innerHTML = '';
+
+            try {
+                const response = await fetch('/commutetrackr/log_activity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ activity: activity })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Successful log - refresh all button states
+                    await refreshButtonStates();
+                } else {
+                    // Any error - still refresh all button states to show current reality
+                    if (data.error) {
+                        showError(data.error);
+                    }
+                    await refreshButtonStates();
+                }
+            } catch (error) {
+                console.error('Error logging activity:', error);
+                showError('Network error. Please try again.');
+                // Even on network error, try to refresh states
+                await refreshButtonStates();
+            } finally {
+                button.classList.remove('loading');
+            }
+        }
+
+        // Add event listeners to all buttons
+        document.querySelectorAll('.btn').forEach(button => {
+            const activity = button.getAttribute('data-activity');
+            
+            button.addEventListener('click', function() {
+                if (!this.disabled) {
+                    logActivity(this, activity);
+                }
+            });
+        });
+
+        // Handle visibility change to refresh data when page becomes visible
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                updateDate();
+                refreshButtonStates();
+            }
+        });
+
+        // Refresh button states on page load
+        window.addEventListener('load', function() {
+            refreshButtonStates();
+        });
+
+        // Also refresh button states periodically (every 30 seconds)
+        setInterval(refreshButtonStates, 30000);
+
+        // Prevent zoom on double-tap for mobile
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
