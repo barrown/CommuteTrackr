@@ -1,3 +1,5 @@
+I'm not sure why github is showing different versions to the linked images ... click on the plots to reveal the most up to date version.
+
 ## Cycling
 ![Cycling](cycling_duration_distribution.png)
 
@@ -21,5 +23,3 @@
 
 ## Calplot returning home
 ![Calplot return](calplot_return.png)
-
-eof
